@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int maxN = 256;
+
+vector<string> atoken, btoken;
+char a[maxN], b[maxN];
+
+int f[maxN][maxN];
+
+int
+english(char x)
+{
+	return (x >= 'a' && x <= 'z') || (x >= 'A' && x <= 'Z') || (x >= '0' && x <= '9');
+}
+
+void
+convert(char *s, vector<string> &token)
+{
+	int i, j;
+	int len = strlen(s);
+	char str[maxN];
+	token.push_back("");
+	for (i = 0; i < len;)
+	{
+		if (s[i] < 0)
+		{
+			str[0] = s[i];
+			str[1] = s[i + 1];
+			str[2] = '\0';
+			token.push_back(string(str));
+			i += 2;
+		}
+		else if (english(s[i]))
+		{
+			for (j = i; j < len && english(s[j]); ++j)
+			{
+				str[j - i] = s[j];
+			}
+			str[j - i] = '\0';
+			token.push_back(string(str));
+			i = j;
+		}
+		else
+		{
+			token.push_back(string(s[i], 1));
+			++i;
+		}
+	}
+}
+
+int main()
+{
+	int i, j, k, val;
+	scanf("%s", a);
+	scanf("%s", b);
+	convert(a, atoken);
+	convert(b, btoken);
+
+	for (i = 1; i < atoken.size(); ++i)
+	{
+		for (j = 1; j < btoken.size(); ++j)
+		{
+			f[i][j] = f[i - 1][j];
+			if (f[i][j] < f[i][j - 1])
+			{
+				f[i][j] = f[i][j - 1];
+			}
+			for (k = 1; k <= i && k <= j && atoken[i - k + 1] == btoken[j - k + 1]; ++k)
+			{
+				val = k * k;
+				if (f[i][j] < f[i - k][j - k] + val)
+				{
+					f[i][j] = f[i - k][j - k] + val;
+				}
+			}
+		}
+	}
+	printf("%d\n", f[atoken.size() - 1][btoken.size() - 1]);
+	return 0;
+}
+
